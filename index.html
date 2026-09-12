@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPFL Rede Interativa - Piracicaba</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.min.css" />
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>⚡ CPFL Rede Interativa</h1>
+                <p>Mapa da rede elétrica - Piracicaba e Centro-Sul de SP</p>
+            </div>
+            <button class="btn-menu" id="btnMenu">☰ Menu</button>
+        </header>
+
+        <!-- Painel Lateral -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <h2>Filtros & Busca</h2>
+                
+                <!-- Localização Atual -->
+                <button class="btn-primary" id="btnLocalizacao">📍 Minha Localização</button>
+                
+                <hr>
+                
+                <!-- Filtro por Tipo -->
+                <div class="filter-group">
+                    <label><strong>Tipo:</strong></label>
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" name="tipo" value="poste" checked> Postes
+                        </label>
+                        <label>
+                            <input type="checkbox" name="tipo" value="transformador" checked> Transformadores
+                        </label>
+                        <label>
+                            <input type="checkbox" name="tipo" value="chave" checked> Chaves
+                        </label>
+                        <label>
+                            <input type="checkbox" name="tipo" value="subestacao" checked> Subestações
+                        </label>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Filtro por Status -->
+                <div class="filter-group">
+                    <label><strong>Status:</strong></label>
+                    <select id="filterStatus">
+                        <option value="">Todos</option>
+                        <option value="ativo">Ativo</option>
+                        <option value="manutencao">Manutenção</option>
+                        <option value="inativo">Inativo</option>
+                    </select>
+                </div>
+                
+                <hr>
+                
+                <!-- Busca por Número -->
+                <div class="filter-group">
+                    <label><strong>Buscar por Número:</strong></label>
+                    <input type="text" id="searchInput" placeholder="Ex: CH-001, TR-015, ALI-05">
+                    <button class="btn-secondary" id="btnBuscar">🔍 Buscar</button>
+                </div>
+                
+                <hr>
+                
+                <!-- Informações do Ponto Selecionado -->
+                <div id="infoPanel" class="info-panel" style="display: none;">
+                    <h3>Informações</h3>
+                    <div id="infoContent"></div>
+                    <button class="btn-secondary" id="btnRota">🚗 Traçar Rota</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mapa -->
+        <main class="main">
+            <div id="map"></div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-control-geocoder/1.13.0/Control.Geocoder.min.js"></script>
+    
+    <script src="js/app.js"></script>
+    <script src="js/mapa.js"></script>
+    <script src="js/filtros.js"></script>
+    <script src="js/rotas.js"></script>
+</body>
+</html>

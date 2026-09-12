@@ -3,101 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CPFL Rede Interativa - Piracicaba</title>
-    
-    <!-- Leaflet CSS -->
+    <title>CPFL Rede Interativa</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.min.css" />
-    
-    <link rel="stylesheet" href="css/style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; font-family: Arial, sans-serif; overflow: hidden; }
+        .header { background: #2c3e50; color: white; padding: 15px; }
+        .header h1 { font-size: 1.3rem; }
+        .header p { font-size: 0.8rem; opacity: 0.8; }
+        .wrapper { display: flex; height: calc(100vh - 80px); }
+        #map { flex: 1; }
+        .panel { width: 300px; background: white; padding: 15px; overflow-y: auto; border-left: 1px solid #ddd; }
+        .panel h2 { font-size: 1rem; margin-bottom: 15px; color: #2c3e50; border-bottom: 2px solid #e74c3c; padding-bottom: 10px; }
+        button { width: 100%; padding: 10px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        .btn-blue { background: #3498db; color: white; }
+        .btn-green { background: #27ae60; color: white; }
+        input, select { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+        label { display: block; margin: 10px 0 5px 0; font-weight: bold; font-size: 0.9rem; }
+        .check-group { margin: 10px 0; }
+        .check-group label { display: flex; align-items: center; margin: 5px 0; font-weight: normal; }
+        .check-group input { width: auto; margin-right: 8px; }
+        .info-box { background: #f0f0f0; padding: 10px; border-radius: 4px; margin-top: 15px; display: none; max-height: 150px; overflow-y: auto; }
+        .info-box.active { display: block; }
+        .info-box h3 { font-size: 0.95rem; margin-bottom: 10px; color: #2c3e50; }
+        .info-box p { font-size: 0.8rem; line-height: 1.5; margin: 3px 0; }
+        hr { border: none; height: 1px; background: #ddd; margin: 10px 0; }
+        @media (max-width: 768px) {
+            .wrapper { flex-direction: column; height: calc(100vh - 120px); }
+            .panel { width: 100%; height: 40%; }
+            #map { height: 60%; }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <h1>⚡ CPFL Rede Interativa</h1>
-                <p>Mapa da rede elétrica - Piracicaba e Centro-Sul de SP</p>
-            </div>
-            <button class="btn-menu" id="btnMenu">☰ Menu</button>
-        </header>
-
-        <!-- Painel Lateral -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-content">
-                <h2>Filtros & Busca</h2>
-                
-                <!-- Localização Atual -->
-                <button class="btn-primary" id="btnLocalizacao">📍 Minha Localização</button>
-                
-                <hr>
-                
-                <!-- Filtro por Tipo -->
-                <div class="filter-group">
-                    <label><strong>Tipo:</strong></label>
-                    <div class="checkbox-group">
-                        <label>
-                            <input type="checkbox" name="tipo" value="poste" checked> Postes
-                        </label>
-                        <label>
-                            <input type="checkbox" name="tipo" value="transformador" checked> Transformadores
-                        </label>
-                        <label>
-                            <input type="checkbox" name="tipo" value="chave" checked> Chaves
-                        </label>
-                        <label>
-                            <input type="checkbox" name="tipo" value="subestacao" checked> Subestações
-                        </label>
-                    </div>
-                </div>
-                
-                <hr>
-                
-                <!-- Filtro por Status -->
-                <div class="filter-group">
-                    <label><strong>Status:</strong></label>
-                    <select id="filterStatus">
-                        <option value="">Todos</option>
-                        <option value="ativo">Ativo</option>
-                        <option value="manutencao">Manutenção</option>
-                        <option value="inativo">Inativo</option>
-                    </select>
-                </div>
-                
-                <hr>
-                
-                <!-- Busca por Número -->
-                <div class="filter-group">
-                    <label><strong>Buscar por Número:</strong></label>
-                    <input type="text" id="searchInput" placeholder="Ex: CH-001, TR-015, ALI-05">
-                    <button class="btn-secondary" id="btnBuscar">🔍 Buscar</button>
-                </div>
-                
-                <hr>
-                
-                <!-- Informações do Ponto Selecionado -->
-                <div id="infoPanel" class="info-panel" style="display: none;">
-                    <h3>Informações</h3>
-                    <div id="infoContent"></div>
-                    <button class="btn-secondary" id="btnRota">🚗 Traçar Rota</button>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Mapa -->
-        <main class="main">
-            <div id="map"></div>
-        </main>
+    <div class="header">
+        <h1>⚡ CPFL Rede Interativa</h1>
+        <p>Mapa da rede elétrica de Piracicaba - SP</p>
     </div>
 
-    <!-- Scripts -->
+    <div class="wrapper">
+        <div id="map"></div>
+        
+        <div class="panel">
+            <h2>🔍 Filtros & Busca</h2>
+            
+            <button class="btn-blue" onclick="obterLocalizacao()">📍 Minha Localização</button>
+            
+            <hr>
+            
+            <label><strong>Tipo de Equipamento:</strong></label>
+            <div class="check-group">
+                <label><input type="checkbox" id="tipo-poste" checked onchange="atualizarMapa()"> Postes</label>
+                <label><input type="checkbox" id="tipo-transformador" checked onchange="atualizarMapa()"> Transformadores</label>
+                <label><input type="checkbox" id="tipo-chave" checked onchange="atualizarMapa()"> Chaves</label>
+                <label><input type="checkbox" id="tipo-subestacao" checked onchange="atualizarMapa()"> Subestações</label>
+            </div>
+            
+            <hr>
+            
+            <label><strong>Status:</strong></label>
+            <select id="status-filter" onchange="atualizarMapa()">
+                <option value="">Todos</option>
+                <option value="ativo">Ativo</option>
+                <option value="manutencao">Manutenção</option>
+            </select>
+            
+            <hr>
+            
+            <label><strong>Buscar por Número:</strong></label>
+            <input type="text" id="search-input" placeholder="Ex: CH-2024-001">
+            <button class="btn-green" onclick="buscar()">🔍 Buscar</button>
+            
+            <div id="info-box" class="info-box">
+                <h3>Informações</h3>
+                <div id="info-content"></div>
+                <button class="btn-green" onclick="tracarRota()" style="margin-top: 10px;">🚗 Traçar Rota</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-control-geocoder/1.13.0/Control.Geocoder.min.js"></script>
-    
-    <script src="js/app.js"></script>
-    <script src="js/mapa.js"></script>
-    <script src="js/filtros.js"></script>
-    <script src="js/rotas.js"></script>
+    <script>
+        // Dados dos equipamentos
+        const equipamentos = [
+            { id: 'POSTE_001', tipo: 'poste', numero: 'CH-2024-001', alimentador: 'ALI-15', status: 'ativo', local: 'Rua Principal, 500', lat: -22.7253, lng: -47.6497 },
+            { id: 'POSTE_002', tipo: 'poste', numero: 'CH-2024-002', alimentador: 'ALI-16', status: 'ativo', local: 'Avenida Brasil, 1000', lat: -22.7300, lng: -47.6550 },
+            { id: 'POSTE_003', tipo: 'poste', numero: 'CH-2024-003', alimentador: 'ALI-17', status: 'manutencao', local: 'Rua das Flores, 250', lat: -22.7200, lng: -47.6450 },
+            { id: 'TR-2024-001', tipo: 'transformador', numero: 'TR-2024-001', potencia: '75 kVA', status: 'ativo', local: 'Poste POSTE_001', lat: -22.7253, lng: -47.6497 },
+            { id: 'SUB-001', tipo: 'subestacao', nome: 'Subest. Piracicaba Centro', tensao: '138/13.8 kV', status: 'ativo', local: 'Avenida Histórica, 500', lat: -22.7280, lng: -47.6520 }
+        ];
+
+        let mapa, localizacaoUsuario = null, equipamentoSelecionado = null, marcadores = {};
+
+        // Inicializar
+        function iniciar() {
+            mapa = L.map('map').setView([-22.7253, -47.6497], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap',
+                maxZoom: 19
+            }).addTo(mapa);
+
+            adicionarMarcadores();
+        }
+
+        function adicionarMarcadores() {
+            Object.keys(marcadores).forEach(id => marcadores[id].remove());
+            marcadores = {};
+
+            const tiposAtivos = {
+                poste: document.getElementById('tipo-poste').checked,
+                transformador: document.getElementById('tipo-transformador').checked,
+                chave: document.getElementById('tipo-chave').checked,
+                subestacao: document.getElementById('tipo-subestacao').checked
+            };
+
+            const statusFiltro = document.getElementById('status-filter').value;
+
+            equipamentos.forEach(eq => {
+                if (!tiposAtivos[eq.tipo]) return;
+                if (statusFiltro && eq.status !== statusFiltro) return;
+
+                const cores = { poste: '#3498db', transformador: '#e74c3c', chave: '#f39c12', subestacao: '#27ae60' };
+                const marker = L.circleMarker([eq.lat, eq.lng], {
+                    radius: 8,
+                    fillColor: cores[eq.tipo],
+                    color: '#fff',
+                    weight: 2,
+                    fillOpacity: 0.8
+                }).addTo(mapa)
+                  .on('click', () => selecionarEquipamento(eq));
+
+                marcadores[eq.id] = marker;
+            });
+        }
+
+        function atualizarMapa() {
+            adicionarMarcadores();
+        }
+
+        function selecionarEquipamento(eq) {
+            equipamentoSelecionado = eq;
+            const infoContent = document.getElementById('info-content');
+            let html = '';
+            for (let chave in eq) {
+                if (chave !== 'lat' && chave !== 'lng') {
+                    html += `<p><strong>${chave}:</strong> ${eq[chave]}</p>`;
+                }
+            }
+            infoContent.innerHTML = html;
+            document.getElementById('info-box').classList.add('active');
+            mapa.setView([eq.lat, eq.lng], 16);
+        }
+
+        function obterLocalizacao() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    localizacaoUsuario = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    if (document.getElementById('marcador-usuario')) {
+                        document.getElementById('marcador-usuario').remove();
+                    }
+                    L.circleMarker([localizacaoUsuario.lat, localizacaoUsuario.lng], {
+                        radius: 10,
+                        fillColor: '#2c3e50',
+                        color: '#fff',
+                        weight: 3,
+                        fillOpacity: 0.8
+                    }).addTo(mapa).bindPopup('Sua localização');
+                    mapa.setView([localizacaoUsuario.lat, localizacaoUsuario.lng], 15);
+                }, () => alert('Erro ao obter localização'));
+            } else {
+                alert('Geolocalização não suportada');
+            }
+        }
+
+        function buscar() {
+            const termo = document.getElementById('search-input').value.toUpperCase().trim();
+            if (!termo) { alert('Digite algo'); return; }
+
+            const resultado = equipamentos.find(eq => 
+                eq.numero?.includes(termo) || eq.id?.includes(termo) || eq.alimentador?.includes(termo)
+            );
+
+            if (resultado) {
+                selecionarEquipamento(resultado);
+            } else {
+                alert('Não encontrado');
+            }
+        }
+
+        function tracarRota() {
+            if (!equipamentoSelecionado || !localizacaoUsuario) {
+                alert('Selecione um equipamento e sua localização');
+                return;
+            }
+            alert('Rota traçada de ' + localizacaoUsuario.lat + ',' + localizacaoUsuario.lng + ' até ' + equipamentoSelecionado.lat + ',' + equipamentoSelecionado.lng);
+        }
+
+        // Iniciar quando carregar
+        window.addEventListener('load', iniciar);
+    </script>
 </body>
 </html>
